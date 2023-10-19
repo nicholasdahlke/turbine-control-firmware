@@ -9,17 +9,16 @@
 #include "mcp23008.h"
 #include "driver/i2c.h"
 
+
 /*****************************************************//**
  * @brief Timeout for all I2C operations
  *********************************************************/
 #define TIMEOUT (1000 / portTICK_PERIOD_MS)
 
-
 /*****************************************************//**
  * @brief MCP23008 register size in bytes
  *********************************************************/
 #define MCP23008_REGISTER_SIZE 1
-
 
 /*****************************************************//**
  *  @brief Reads the value of an input channel
@@ -39,7 +38,6 @@ bool mcp23008_read_channel(uint8_t mcp23008_addr, uint8_t gpio_number)
     return mcp23008_register_read_bit(mcp23008_addr, GPIO, gpio_number);
 }
 
-
 /*****************************************************//**
  *  @brief Set the value of an output channel
  *
@@ -57,7 +55,6 @@ void mcp23008_write_channel(uint8_t mcp23008_addr, uint8_t gpio_number, bool val
 {
     mcp23008_register_write_bit(mcp23008_addr, GPIO, gpio_number, value);
 }
-
 
 /*****************************************************//**
  *  @brief Configure a channel
@@ -81,7 +78,6 @@ void mcp23008_configure_channel(uint8_t mcp23008_addr, const mcp23008_gpio_confi
     mcp23008_register_write_bit(mcp23008_addr, GPPU, chan, mcp23008_gpio_config.pull_up_en);
 }
 
-
 /*****************************************************//**
  *  @brief Configure the MCP23008
  *
@@ -96,7 +92,6 @@ void mcp23008_configure_device(uint8_t mcp23008_addr, const mcp23008_device_conf
 {
     mcp23008_register_write(mcp23008_addr, IOCON, (uint8_t*)&mcp23008_device_config, sizeof(mcp23008_device_config));
 }
-
 
 /*****************************************************//**
  *  @brief Read a value from a register
@@ -114,9 +109,25 @@ void mcp23008_configure_device(uint8_t mcp23008_addr, const mcp23008_device_conf
  *********************************************************/
 static void mcp23008_register_read(uint8_t mcp23008_addr, uint8_t register_address, uint8_t *p_data, size_t len)
 {
-    i2c_master_read_from_device(0, mcp23008_addr, p_data, len, TIMEOUT);
-}
+    i2c_cmd_handle_t h_cmd = i2c_cmd_link_create();
+    i2c_master_start(h_cmd);
+    i2c_master_write_byte(h_cmd, (mcp23008_addr<<1) | 1, true);
+    i2c_master_write_byte(h_cmd, register_address, true);
+    i2c_master_write_byte(h_cmd, *p_data, true);
+    i2c_master_stop(h_cmd);
 
+    i2c_master_cmd_begin(0, h_cmd, TIMEOUT);
+    i2c_cmd_link_delete(h_cmd);
+
+    h_cmd = i2c_cmd_link_create();
+    i2c_master_write_byte(h_cmd, (mcp23008_addr<<1) | 1, true);
+    i2c_master_read_byte(h_cmd, p_data, false);
+    i2c_master_stop(h_cmd);
+    i2c_master_cmd_begin(0, h_cmd, TIMEOUT);
+    i2c_cmd_link_delete(h_cmd);
+
+
+}
 
 /*****************************************************//**
  *  @brief Write a value to a register
@@ -133,7 +144,15 @@ static void mcp23008_register_read(uint8_t mcp23008_addr, uint8_t register_addre
  *********************************************************/
 static void mcp23008_register_write(uint8_t mcp23008_addr, uint8_t register_address, uint8_t *p_data, size_t len)
 {
-    i2c_master_write_to_device(0, mcp23008_addr, p_data, len, TIMEOUT);
+    i2c_cmd_handle_t h_cmd = i2c_cmd_link_create();
+    i2c_master_start(h_cmd);
+    i2c_master_write_byte(h_cmd, (mcp23008_addr<<1), true);
+    i2c_master_write_byte(h_cmd, register_address, true);
+    i2c_master_write_byte(h_cmd, *p_data, true);
+    i2c_master_stop(h_cmd);
+
+    i2c_master_cmd_begin(0, h_cmd, TIMEOUT);
+    i2c_cmd_link_delete(h_cmd);
 }
 
 /*****************************************************//**
@@ -162,7 +181,6 @@ static void mcp23008_register_write_bit(uint8_t mcp23008_addr, uint8_t register_
         mcp23008_register_write(mcp23008_addr, register_address, &mcp23008_reg_write, MCP23008_REGISTER_SIZE);
     }
 }
-
 
 /*****************************************************//**
  *  @brief Read a bit from a register at a specific position

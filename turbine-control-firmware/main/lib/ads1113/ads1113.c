@@ -9,6 +9,10 @@
 
 #include "ads1113.h"
 #include "driver/i2c.h"
+
+/*****************************************************//**
+ * @brief Timeout for all I2C operations
+ *********************************************************/
 #define TIMEOUT (1000 / portTICK_PERIOD_MS)
 
 /*****************************************************//**
@@ -28,11 +32,12 @@ static void ads1113_register_write(uint8_t ads1113_addr, uint8_t register_addres
 {
     i2c_cmd_handle_t h_cmd = i2c_cmd_link_create();
     i2c_master_start(h_cmd);
-    i2c_master_write_byte(h_cmd, ads1113_addr, true);
+    i2c_master_write_byte(h_cmd, (ads1113_addr<<1), true);
     i2c_master_write_byte(h_cmd, register_address, true);
 
     uint8_t front = (uint8_t)(0xff00&(*p_data))>>8; // Gets the first byte of a 16-bit integer
     uint8_t back = (uint8_t)(0x00ff&(*p_data));     // Gets the last byte of a 16-bit integer
+
     i2c_master_write_byte(h_cmd, front, true);
     i2c_master_write_byte(h_cmd, back, true);
     i2c_master_stop(h_cmd);
@@ -59,12 +64,12 @@ static void ads1113_register_read(uint8_t ads1113_addr, uint8_t register_address
 {
     i2c_cmd_handle_t h_cmd = i2c_cmd_link_create();
     i2c_master_start(h_cmd);
-    i2c_master_write_byte(h_cmd, ads1113_addr, true);
+    i2c_master_write_byte(h_cmd, (ads1113_addr<<1), true);
     i2c_master_write_byte(h_cmd, register_address, true);
     i2c_master_stop(h_cmd);
 
     i2c_master_start(h_cmd);
-    i2c_master_write_byte(h_cmd, ads1113_addr, true);
+    i2c_master_write_byte(h_cmd, (ads1113_addr<<1)|1, true);
     uint8_t front = 0;
     uint8_t back = 0;
     i2c_master_read_byte(h_cmd, &front, true);
