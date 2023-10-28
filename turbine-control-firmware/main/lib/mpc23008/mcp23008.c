@@ -8,12 +8,13 @@
   ********************************************************************/
 #include "mcp23008.h"
 #include "driver/i2c.h"
+#include "esp_log.h"
 
 
 /*****************************************************//**
  * @brief Timeout for all I2C operations
  *********************************************************/
-#define TIMEOUT (1000 / portTICK_PERIOD_MS)
+#define TIMEOUT (100 / portTICK_PERIOD_MS)
 
 /*****************************************************//**
  * @brief MCP23008 register size in bytes
@@ -70,12 +71,12 @@ void mcp23008_configure_channel(uint8_t mcp23008_addr, const mcp23008_gpio_confi
 {
     uint8_t chan = mcp23008_gpio_config.channel;
 
-    mcp23008_register_write_bit(mcp23008_addr, IODIR, chan, mcp23008_gpio_config.direction);
+    mcp23008_register_write_bit(mcp23008_addr, GPPU, chan, mcp23008_gpio_config.pull_up_en);
+    mcp23008_register_write_bit(mcp23008_addr, IODIR, chan, (uint8_t)mcp23008_gpio_config.direction);
     mcp23008_register_write_bit(mcp23008_addr, IPOL, chan, mcp23008_gpio_config.invert_input_en);
     mcp23008_register_write_bit(mcp23008_addr, GPINTEN, chan, mcp23008_gpio_config.interrupt_on_change_en);
     mcp23008_register_write_bit(mcp23008_addr, DEFVAL, chan, mcp23008_gpio_config.interrupt_compare_defval);
     mcp23008_register_write_bit(mcp23008_addr, INTCON, chan, mcp23008_gpio_config.interrupt_type);
-    mcp23008_register_write_bit(mcp23008_addr, GPPU, chan, mcp23008_gpio_config.pull_up_en);
 }
 
 /*****************************************************//**
@@ -107,25 +108,9 @@ void mcp23008_configure_device(uint8_t mcp23008_addr, const mcp23008_device_conf
  *                p_data to be read is stored. Needs to
  *                remain valid while writing.
  *********************************************************/
-static void mcp23008_register_read(uint8_t mcp23008_addr, uint8_t register_address, uint8_t *p_data, size_t len)
+void mcp23008_register_read(uint8_t mcp23008_addr, uint8_t register_address, uint8_t *p_data, size_t len)
 {
-    i2c_cmd_handle_t h_cmd = i2c_cmd_link_create();
-    i2c_master_start(h_cmd);
-    i2c_master_write_byte(h_cmd, (mcp23008_addr<<1) | 1, true);
-    i2c_master_write_byte(h_cmd, register_address, true);
-    i2c_master_write_byte(h_cmd, *p_data, true);
-    i2c_master_stop(h_cmd);
-
-    i2c_master_cmd_begin(0, h_cmd, TIMEOUT);
-    i2c_cmd_link_delete(h_cmd);
-
-    h_cmd = i2c_cmd_link_create();
-    i2c_master_write_byte(h_cmd, (mcp23008_addr<<1) | 1, true);
-    i2c_master_read_byte(h_cmd, p_data, false);
-    i2c_master_stop(h_cmd);
-    i2c_master_cmd_begin(0, h_cmd, TIMEOUT);
-    i2c_cmd_link_delete(h_cmd);
-
+    i2c_master_write_read_device(0, mcp23008_addr, &register_address, 1,  p_data, len, TIMEOUT);
 
 }
 
@@ -144,15 +129,8 @@ static void mcp23008_register_read(uint8_t mcp23008_addr, uint8_t register_addre
  *********************************************************/
 static void mcp23008_register_write(uint8_t mcp23008_addr, uint8_t register_address, uint8_t *p_data, size_t len)
 {
-    i2c_cmd_handle_t h_cmd = i2c_cmd_link_create();
-    i2c_master_start(h_cmd);
-    i2c_master_write_byte(h_cmd, (mcp23008_addr<<1), true);
-    i2c_master_write_byte(h_cmd, register_address, true);
-    i2c_master_write_byte(h_cmd, *p_data, true);
-    i2c_master_stop(h_cmd);
-
-    i2c_master_cmd_begin(0, h_cmd, TIMEOUT);
-    i2c_cmd_link_delete(h_cmd);
+    uint8_t write_buf[2] = {register_address, *p_data};
+    i2c_master_write_to_device(0, mcp23008_addr, write_buf, sizeof(write_buf), TIMEOUT);
 }
 
 /*****************************************************//**
@@ -201,6 +179,7 @@ static bool mcp23008_register_read_bit(uint8_t mcp23008_addr, uint8_t register_a
     uint8_t mcp23008_reg_read = 0;
     mcp23008_register_read(mcp23008_addr, register_address, &mcp23008_reg_read,MCP23008_REGISTER_SIZE);
     return ((1 << pos) & mcp23008_reg_read ) != 0;
+
 }
 
 // End of file mcp23008.c

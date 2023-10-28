@@ -31,6 +31,16 @@ typedef enum
 
 } mcp23008_register_t;
 
+/*****************************************************//**
+ * @brief An enum specifying the GPIO direction
+ *********************************************************/
+typedef enum
+{
+    GPIO_OUTPUT = 0,
+    GPIO_INPUT = 0
+
+} mcp23008_direction_t;
+
 
 /*****************************************************//**
  * @brief A structure used to configure a device channel
@@ -38,7 +48,7 @@ typedef enum
 typedef struct
 {
     uint8_t channel; /**< The channel to be configured. */
-    uint8_t direction; /**< Channel direction. 0=OUTPUT; 1=INPUT */
+    mcp23008_direction_t direction; /**< Channel direction. 0=OUTPUT; 1=INPUT */
     uint8_t invert_input_en; /**< Apply a Logic NOT to the value. 0=No; 1=Yes */
     uint8_t interrupt_on_change_en; /**< Enable an interrupt on change. 0=No; 1=Yes */
     uint8_t interrupt_compare_defval;  /**< Logic Value to compare against if set via interrupt_type */
@@ -65,9 +75,10 @@ typedef struct
 
 bool mcp23008_read_channel(uint8_t mcp23008_addr, uint8_t gpio_number);
 void mcp23008_write_channel(uint8_t mcp23008_addr, uint8_t gpio_number, bool value);
-void mcp23008_configure_channels(uint8_t mcp23008_addr, const mcp23008_gpio_config_t mcp23008_gpio_config);
+void mcp23008_configure_channel(uint8_t mcp23008_addr, const mcp23008_gpio_config_t mcp23008_gpio_config);
 
 void mcp23008_configure_device(uint8_t mcp23008_addr, const mcp23008_device_config_t mcp23008_device_config);
+
 static void mcp23008_register_read(uint8_t mcp23008_addr, uint8_t register_address, uint8_t *p_data, size_t len);
 static void mcp23008_register_write(uint8_t mcp23008_addr, uint8_t register_address, uint8_t *p_data, size_t len);
 static void mcp23008_register_write_bit(uint8_t mcp23008_addr, uint8_t register_address, uint8_t pos, bool value);
