@@ -1,1 +1,1 @@
-idf_component_register(SRCS "app_main.c" "lib/mpc23008/mcp23008.h" "lib/mpc23008/mcp23008.c" "lib/ads1113/ads1113.h" "." INCLUDE_DIRS "lib/")
+idf_component_register(SRCS "app_main.c" "controller.c" "controller.h" "." INCLUDE_DIRS)

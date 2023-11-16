@@ -1,0 +1,3 @@
+[submodule "turbine-control-firmware/esp-idf-lib"]
+	path = turbine-control-firmware/esp-idf-lib
+	url = https://github.com/UncleRus/esp-idf-lib.git

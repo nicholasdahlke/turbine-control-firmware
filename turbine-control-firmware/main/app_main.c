@@ -1,54 +1,85 @@
+#define LOCAL_LOG_LEVEL ESP_LOG_VERBOSE
 #include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include "lib/mpc23008/mcp23008.h"
-#include "lib/ads1113/ads1113.h"
-#include <driver/i2c.h>
+#include <driver/dac.h>
+#include <esp_log.h>
+#include <esp_vfs_fat.h>
+#include <driver/sdmmc_host.h>
+#include <sdmmc_cmd.h>
+#include <driver/pulse_cnt.h>
 
-#define MCP1 0x20
-#define MCP2 0x27
+#include "controller.h"
 
-#define I2C_MASTER_FREQ_HZ 400000
+#define MOUNT_POINT "/sdcard"
+
+static const char *TAG = "Turbine Control Firmware";
 
 void initialize()
 {
-    int i2c_master_num = 0;
-    i2c_config_t i2c_config = {
-            .mode = I2C_MODE_MASTER,
-            .sda_io_num = GPIO_NUM_18,
-            .sda_pullup_en = GPIO_PULLUP_DISABLE,
-            .scl_io_num  = GPIO_NUM_19,
-            .scl_pullup_en = GPIO_PULLUP_DISABLE,
-            .master.clk_speed = I2C_MASTER_FREQ_HZ,
-            .clk_flags = 0
+
+    init_controller();
+    set_fan_state(false);
+
+    /*
+    // SD Card
+    esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+            .format_if_mount_failed = false,
+            .max_files = 5,
+            .allocation_unit_size = 16 * 1024
     };
-    i2c_param_config(i2c_master_num, &i2c_config);
-    i2c_driver_install(i2c_master_num,  i2c_config.mode, 0, 0, 0);
+
+    sdmmc_card_t *card;
+
+    const char mount_point[] = MOUNT_POINT;
+    printf("Initializing SD Card\n");
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+    slot_config.width = 4;
+    slot_config.gpio_wp = 16;
+    slot_config.gpio_cd = 5;
+    slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
+
+    ESP_LOGI(TAG, "Mounting filesystem");
+    esp_err_t ret = esp_vfs_fat_sdmmc_mount(mount_point, &host, &slot_config, &mount_config, &card);
+
+    if (ret != ESP_OK) {
+        if (ret == ESP_FAIL) {
+            ESP_LOGE(TAG, "Failed to mount filesystem. "
+                          "If you want the card to be formatted, set the EXAMPLE_FORMAT_IF_MOUNT_FAILED menuconfig option.");
+        } else {
+            ESP_LOGE(TAG, "Failed to initialize the card (%s). "
+                          "Make sure SD card lines have pull-up resistors in place.", esp_err_to_name(ret));
+        }
+        return;
+    }
+    ESP_LOGI(TAG, "Filesystem mounted");
+    sdmmc_card_print_info(stdout, card);
+    */
+    // Test fans
+    set_fan_state(true);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    set_fan_state(false);
+    set_gpio(DO3_GPIO, true);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    set_gpio(DO3_GPIO, false);
+
+    ESP_LOGI(TAG, "Boot sequence complete");
+    for(;;)
+    {
+        ESP_LOGI(TAG, "Current enc speed of %f", get_angular_speed());
+        ESP_LOGI(TAG, "Current wind speed of %f", get_wind_speed());
+        ESP_LOGI(TAG, "Value of DI1 is %d", get_gpio(DI1_GPIO));
+        ESP_LOGI(TAG, "Value of DI2 is %d", get_gpio(DI2_GPIO));
+        ESP_LOGI(TAG, "Value of DI3 is %d", get_gpio(DI3_GPIO));
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+
+
 }
 
 void app_main(void)
 {
     initialize();
-
-    mcp23008_device_config_t mcp23008_config;
-    mcp23008_config.interrupt_open_drain_en = 0;
-    mcp23008_config.interrupt_polarity_en = 0;
-    mcp23008_config.sda_slew_rate_control_en = 0;
-    mcp23008_config.sequential_operation_en = 1;
-    mcp23008_configure_device(MCP1, mcp23008_config);
-    printf("configured device\n");
-
-
-    mcp23008_gpio_config_t mcp23008_gpio_0_config;
-    mcp23008_gpio_0_config.channel = 6;
-    mcp23008_gpio_0_config.direction = GPIO_OUTPUT;
-    mcp23008_gpio_0_config.interrupt_compare_defval = 0;
-    mcp23008_gpio_0_config.interrupt_on_change_en = 0;
-    mcp23008_gpio_0_config.interrupt_type = 0;
-    mcp23008_gpio_0_config.invert_input_en = 0;
-    mcp23008_gpio_0_config.pull_up_en = 0;
-    uint8_t data = 0;
-    mcp23008_configure_channel(MCP1, mcp23008_gpio_0_config);
-    mcp23008_write_channel(MCP1, 6, 0);
 
 }
