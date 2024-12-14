@@ -1,5 +1,0 @@
-<map id="main/lib/ads1113/ads1113.h" name="main/lib/ads1113/ads1113.h">
-<area shape="rect" id="node1" title="ESP32 Driver for the I2C based 16bit ADC ADS1113." alt="" coords="66,5,271,32"/>
-<area shape="rect" id="node2" href="$app__main_8c.html" title=" " alt="" coords="5,80,140,107"/>
-<area shape="rect" id="node3" href="$ads1113_8c.html" title="ESP32 Driver for the I2C based 16bit ADC ADS1113." alt="" coords="164,80,368,107"/>
-</map>

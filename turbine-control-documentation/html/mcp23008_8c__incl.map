@@ -1,8 +1,0 @@
-<map id="main/lib/mpc23008/mcp23008.c" name="main/lib/mpc23008/mcp23008.c">
-<area shape="rect" id="node1" title="ESP32 Driver for the I2C based 8 channel IO Expander MCP23008." alt="" coords="102,5,333,32"/>
-<area shape="rect" id="node2" href="$mcp23008_8h.html" title="ESP32 Driver for the I2C based 8 channel IO Expander MCP23008." alt="" coords="105,80,207,107"/>
-<area shape="rect" id="node6" title=" " alt="" coords="231,80,326,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="5,155,88,181"/>
-<area shape="rect" id="node4" title=" " alt="" coords="113,155,199,181"/>
-<area shape="rect" id="node5" title=" " alt="" coords="224,155,299,181"/>
-</map>
