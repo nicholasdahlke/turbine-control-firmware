@@ -29,10 +29,10 @@ void init_controller()
 
     // Init IO Expanders
     ESP_LOGI(TAG, "Initializing IO Expanders");
-    ESP_ERROR_CHECK(mcp23008_init_desc(&mcp1, MCP1_ADDR, 0, SDA_GPIO, SCL_GPIO));
+   // ESP_ERROR_CHECK(mcp23008_init_desc(&mcp1, MCP1_ADDR, 0, SDA_GPIO, SCL_GPIO));
     ESP_ERROR_CHECK(mcp23008_init_desc(&mcp2, MCP2_ADDR, 0, SDA_GPIO, SCL_GPIO));
 
-    ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, FAN_GPIO, MCP23008_GPIO_OUTPUT));
+/*    ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, FAN_GPIO, MCP23008_GPIO_OUTPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, DI1_GPIO, MCP23008_GPIO_INPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, DI2_GPIO, MCP23008_GPIO_INPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, DI3_GPIO, MCP23008_GPIO_INPUT));
@@ -43,7 +43,7 @@ void init_controller()
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp2, DIVIDER1_GPIO, MCP23008_GPIO_OUTPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp2, DIVIDER2_GPIO, MCP23008_GPIO_OUTPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp2, DIVIDER3_GPIO, MCP23008_GPIO_OUTPUT));
-
+*/
     // Init ESP GPIO
     ESP_ERROR_CHECK(gpio_set_direction(DO1_GPIO, GPIO_MODE_OUTPUT));
     ESP_ERROR_CHECK(gpio_set_direction(DO2_GPIO, GPIO_MODE_OUTPUT));
@@ -133,7 +133,7 @@ void init_controller()
     timer_set_counter_value(TIMER_GROUP_1, TIMER_0, 0);
     timer_set_alarm_value(TIMER_GROUP_1, TIMER_0, 1.0 * TIMER_SCALE);
     timer_enable_intr(TIMER_GROUP_1, TIMER_0);
-    //timer_isr_callback_add(TIMER_GROUP_1, TIMER_0, windspeed_isr_callback, 0, 0);
+    timer_isr_callback_add(TIMER_GROUP_1, TIMER_0, windspeed_isr_callback, 0, 0);
     timer_start(TIMER_GROUP_1, TIMER_0);
 
 }
@@ -262,7 +262,7 @@ static bool IRAM_ATTR windspeed_isr_callback(void * args)
 
 bool get_gpio(uint8_t gpio_num)
 {
-    bool out;
+    uint32_t out;
     mcp23008_get_level(&mcp1, gpio_num, &out);
     return out;
 }

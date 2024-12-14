@@ -1,0 +1,67 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cd /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/bootloader/esp-idf/esptool_py && /home/nicholas/.espressif/python_env/idf5.4_py3.12_env/bin/python /home/nicholas/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/bootloader/bootloader.bin
+Bootloader binary size 0x6560 bytes. 0xaa0 bytes (9%) free.
+[2/10] No install step for 'bootloader'
+[3/10] Completed 'bootloader'
+[4/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj
+In file included from /home/nicholas/turbine-control-firmware/turbine-control-firmware/main/app_main.c:5:
+/home/nicholas/esp-idf/components/driver/deprecated/driver/dac.h:16:2: warning: #warning "The legacy DAC driver is deprecated, please use `driver/dac_oneshot.h`, `driver/dac_cosine.h` or `driver/dac_continuous.h` instead" [-Wcpp]
+   16 | #warning "The legacy DAC driver is deprecated, please use `driver/dac_oneshot.h`, `driver/dac_cosine.h` or `driver/dac_continuous.h` instead"
+      |  ^~~~~~~
+In file included from /home/nicholas/turbine-control-firmware/turbine-control-firmware/main/app_main.c:12:
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:87:16: warning: 'get_current_adc_raw' declared 'static' but never defined [-Wunused-function]
+   87 | static int16_t get_current_adc_raw();
+      |                ^~~~~~~~~~~~~~~~~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:88:16: warning: 'get_voltage_adc_raw' declared 'static' but never defined [-Wunused-function]
+   88 | static int16_t get_voltage_adc_raw();
+      |                ^~~~~~~~~~~~~~~~~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:92:13: warning: 'set_mos_current' declared 'static' but never defined [-Wunused-function]
+   92 | static void set_mos_current(float current, linear_calib_t calib);
+      |             ^~~~~~~~~~~~~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:96:13: warning: 'encoder_speed_isr_callback' declared 'static' but never defined [-Wunused-function]
+   96 | static bool encoder_speed_isr_callback(void * args);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:99:13: warning: 'windspeed_isr_callback' declared 'static' but never defined [-Wunused-function]
+   99 | static bool windspeed_isr_callback(void * args);
+      |             ^~~~~~~~~~~~~~~~~~~~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:61:27: warning: 'pcnt_unit_windspeed' defined but not used [-Wunused-variable]
+   61 | static pcnt_unit_handle_t pcnt_unit_windspeed = NULL;
+      |                           ^~~~~~~~~~~~~~~~~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:60:27: warning: 'pcnt_unit_encoder' defined but not used [-Wunused-variable]
+   60 | static pcnt_unit_handle_t pcnt_unit_encoder = NULL;
+      |                           ^~~~~~~~~~~~~~~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:57:14: warning: 'adc_gain' defined but not used [-Wunused-variable]
+   57 | static float adc_gain = 0.0f;
+      |              ^~~~~~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:54:18: warning: 'adc2' defined but not used [-Wunused-variable]
+   54 | static i2c_dev_t adc2;
+      |                  ^~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:53:18: warning: 'adc1' defined but not used [-Wunused-variable]
+   53 | static i2c_dev_t adc1;
+      |                  ^~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:51:18: warning: 'mcp2' defined but not used [-Wunused-variable]
+   51 | static i2c_dev_t mcp2;
+      |                  ^~~~
+/home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.h:50:18: warning: 'mcp1' defined but not used [-Wunused-variable]
+   50 | static i2c_dev_t mcp1;
+      |                  ^~~~
+[5/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/controller.c.obj
+In file included from /home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.c:7:
+/home/nicholas/esp-idf/components/driver/deprecated/driver/dac.h:16:2: warning: #warning "The legacy DAC driver is deprecated, please use `driver/dac_oneshot.h`, `driver/dac_cosine.h` or `driver/dac_continuous.h` instead" [-Wcpp]
+   16 | #warning "The legacy DAC driver is deprecated, please use `driver/dac_oneshot.h`, `driver/dac_cosine.h` or `driver/dac_continuous.h` instead"
+      |  ^~~~~~~
+In file included from /home/nicholas/turbine-control-firmware/turbine-control-firmware/main/controller.c:8:
+/home/nicholas/esp-idf/components/driver/deprecated/driver/timer.h:16:2: warning: #warning "legacy timer group driver is deprecated, please migrate to driver/gptimer.h" [-Wcpp]
+   16 | #warning "legacy timer group driver is deprecated, please migrate to driver/gptimer.h"
+      |  ^~~~~~~
+[6/10] Linking C static library esp-idf/main/libmain.a
+[7/10] Generating ld/sections.ld
+[8/10] Linking CXX executable turbine-control-firmware.elf
+[9/10] Generating binary image from built executable
+esptool.py v4.8.1
+Creating esp32 image...
+Merged 2 ELF sections
+Successfully created esp32 image.
+Generated /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/turbine-control-firmware.bin
+[10/10] cd /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/esp-idf/esptool_py && /home/nicholas/.espressif/python_env/idf5.4_py3.12_env/bin/python /home/nicholas/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/partition_table/partition-table.bin /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/turbine-control-firmware.bin
+turbine-control-firmware.bin binary size 0x36340 bytes. Smallest app partition is 0x100000 bytes. 0xc9cc0 bytes (79%) free.

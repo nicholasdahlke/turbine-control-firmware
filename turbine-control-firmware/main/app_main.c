@@ -19,7 +19,7 @@ void initialize()
 {
 
     init_controller();
-    set_fan_state(false);
+    //set_fan_state(false);
 
     /*
     // SD Card
@@ -57,23 +57,15 @@ void initialize()
     sdmmc_card_print_info(stdout, card);
     */
     // Test fans
-    set_fan_state(true);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-    set_fan_state(false);
-    set_gpio(DO3_GPIO, true);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    set_gpio(DO3_GPIO, false);
-
+    //set_fan_state(true);
+    //vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //set_fan_state(false);
+    //set_gpio(DO3_GPIO, true);
+    //vTaskDelay(500 / portTICK_PERIOD_MS);
+    //set_gpio(DO3_GPIO, false);
     ESP_LOGI(TAG, "Boot sequence complete");
-    for(;;)
-    {
-        ESP_LOGI(TAG, "Current enc speed of %f", get_angular_speed());
-        ESP_LOGI(TAG, "Current wind speed of %f", get_wind_speed());
-        ESP_LOGI(TAG, "Value of DI1 is %d", get_gpio(DI1_GPIO));
-        ESP_LOGI(TAG, "Value of DI2 is %d", get_gpio(DI2_GPIO));
-        ESP_LOGI(TAG, "Value of DI3 is %d", get_gpio(DI3_GPIO));
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
+
+
 
 
 }
@@ -81,5 +73,16 @@ void initialize()
 void app_main(void)
 {
     initialize();
-
+    set_divider_state(1);
+    set_load_current(1.5);
+    for(;;)
+    {
+        ESP_LOGI(TAG, "Current enc speed of %f", get_angular_speed());
+        ESP_LOGI(TAG, "Current wind speed of %f", get_wind_speed());
+        ESP_LOGI(TAG, "Current load current of %f A", get_current_adc(current_sense_calib));
+        //ESP_LOGI(TAG, "Value of DI1 is %d", get_gpio(DI1_GPIO));
+        //ESP_LOGI(TAG, "Value of DI2 is %d", get_gpio(DI2_GPIO));
+        //ESP_LOGI(TAG, "Value of DI3 is %d", get_gpio(DI3_GPIO));
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
 }
