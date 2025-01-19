@@ -7,6 +7,7 @@
 #include <ads111x.h>
 #include <driver/gpio.h>
 #include <driver/pulse_cnt.h>
+#include <driver/dac_oneshot.h>
 #include <math.h>
 
 
@@ -63,6 +64,9 @@ static const float speed_interval_encoder = 0.1f;
 static volatile int pulses_per_interval_encoder = 0;
 static volatile int pulses_per_interval_windspeed = 0;
 
+//DAC
+static dac_oneshot_handle_t current_dac_handle;
+
 
 typedef struct
 {
@@ -84,19 +88,19 @@ void set_fan_state(bool state);
 
 void set_divider_state(int divider);
 
-static int16_t get_current_adc_raw();
-static int16_t get_voltage_adc_raw();
+//static int16_t get_current_adc_raw();
+//static int16_t get_voltage_adc_raw();
 float get_current_adc(linear_calib_t calib);
 float get_voltage_adc(linear_calib_t calib);
 
-static void set_mos_current(float current, linear_calib_t calib);
+//static void set_mos_current(float current, linear_calib_t calib);
 void set_load_current(float current_setpoint);
 
 float get_angular_speed();
 static bool encoder_speed_isr_callback(void * args);
 
 float get_wind_speed();
-static bool windspeed_isr_callback(void * args);
+//static bool windspeed_isr_callback(void * args);
 
 bool get_gpio(uint8_t gpio_num);
 void set_gpio(uint8_t gpio_num, bool value);

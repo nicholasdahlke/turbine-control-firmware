@@ -4,7 +4,6 @@
 
 #include "controller.h"
 #include <esp_log.h>
-#include <driver/dac.h>
 #include <driver/timer.h>
 #include <string.h>
 static const char *TAG = "Controller";
@@ -14,6 +13,16 @@ const linear_calib_t div2_calib = {62.67711f, -12.85545f};
 const linear_calib_t div3_calib = {1.0f, 0.0f};
 const linear_calib_t current_sense_calib = {4.83048f, -0.94478};
 const linear_calib_t load_calib = {21.98560f, -6.716618f};
+
+
+static bool IRAM_ATTR windspeed_isr_callback(void * args)
+{
+    int pulses = 0;
+    pcnt_unit_get_count(pcnt_unit_windspeed, &pulses);
+    pulses_per_interval_windspeed = pulses;
+    pcnt_unit_clear_count(pcnt_unit_windspeed);
+    return false;
+}
 
 
 void init_controller()
@@ -29,10 +38,10 @@ void init_controller()
 
     // Init IO Expanders
     ESP_LOGI(TAG, "Initializing IO Expanders");
-   // ESP_ERROR_CHECK(mcp23008_init_desc(&mcp1, MCP1_ADDR, 0, SDA_GPIO, SCL_GPIO));
+    ESP_ERROR_CHECK(mcp23008_init_desc(&mcp1, MCP1_ADDR, 0, SDA_GPIO, SCL_GPIO));
     ESP_ERROR_CHECK(mcp23008_init_desc(&mcp2, MCP2_ADDR, 0, SDA_GPIO, SCL_GPIO));
 
-/*    ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, FAN_GPIO, MCP23008_GPIO_OUTPUT));
+    ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, FAN_GPIO, MCP23008_GPIO_OUTPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, DI1_GPIO, MCP23008_GPIO_INPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, DI2_GPIO, MCP23008_GPIO_INPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp1, DI3_GPIO, MCP23008_GPIO_INPUT));
@@ -43,7 +52,9 @@ void init_controller()
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp2, DIVIDER1_GPIO, MCP23008_GPIO_OUTPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp2, DIVIDER2_GPIO, MCP23008_GPIO_OUTPUT));
     ESP_ERROR_CHECK(mcp23008_set_mode(&mcp2, DIVIDER3_GPIO, MCP23008_GPIO_OUTPUT));
-*/
+
+    ESP_LOGI(TAG, "Initializing IO Expanders finished");
+
     // Init ESP GPIO
     ESP_ERROR_CHECK(gpio_set_direction(DO1_GPIO, GPIO_MODE_OUTPUT));
     ESP_ERROR_CHECK(gpio_set_direction(DO2_GPIO, GPIO_MODE_OUTPUT));
@@ -70,16 +81,22 @@ void init_controller()
     adc_gain = ads111x_gain_values[ADS111X_GAIN_2V048];
 
     // Init DAC
-    ESP_ERROR_CHECK(dac_output_enable(LOAD_DAC_CHANNEL));
-    ESP_ERROR_CHECK(dac_output_voltage(LOAD_DAC_CHANNEL, 0));
+//    ESP_ERROR_CHECK(dac_output_enable(LOAD_DAC_CHANNEL));
+//    ESP_ERROR_CHECK(dac_output_voltage(LOAD_DAC_CHANNEL, 0));
+
+    const dac_oneshot_config_t dac_config = {
+	     .chan_id = LOAD_DAC_CHANNEL
+    };
+    ESP_ERROR_CHECK(dac_oneshot_new_channel(&dac_config, &current_dac_handle));
+    ESP_ERROR_CHECK(dac_oneshot_output_voltage(current_dac_handle, 0));
 
     //Init pulse counter for quadrature decoding
-    pcnt_unit_config_t unit_config_encoder = {
+    const pcnt_unit_config_t unit_config_encoder = {
             .high_limit = 30000,
             .low_limit = -30000
     };
     ESP_ERROR_CHECK(pcnt_new_unit(&unit_config_encoder, &pcnt_unit_encoder));
-    pcnt_chan_config_t chan_config_encoder = {
+    const pcnt_chan_config_t chan_config_encoder = {
             .edge_gpio_num = A_GPIO,
             .level_gpio_num = B_GPIO
     };
@@ -87,7 +104,7 @@ void init_controller()
     ESP_ERROR_CHECK(pcnt_new_channel(pcnt_unit_encoder, &chan_config_encoder, &pcnt_chan_encoder));
     ESP_ERROR_CHECK(pcnt_channel_set_edge_action(pcnt_chan_encoder, PCNT_CHANNEL_EDGE_ACTION_HOLD, PCNT_CHANNEL_EDGE_ACTION_INCREASE));
     ESP_ERROR_CHECK(pcnt_channel_set_level_action(pcnt_chan_encoder, PCNT_CHANNEL_LEVEL_ACTION_KEEP, PCNT_CHANNEL_LEVEL_ACTION_INVERSE));
-    pcnt_glitch_filter_config_t filter_config = {
+    const pcnt_glitch_filter_config_t filter_config = {
             .max_glitch_ns = 1000,
     };
     ESP_ERROR_CHECK(pcnt_unit_set_glitch_filter(pcnt_unit_encoder, &filter_config));
@@ -96,12 +113,12 @@ void init_controller()
     ESP_ERROR_CHECK(pcnt_unit_start(pcnt_unit_encoder));
 
     //Init pulse counter for wind speed measurement
-    pcnt_unit_config_t unit_config_windspeed = {
+    const pcnt_unit_config_t unit_config_windspeed = {
             .high_limit = 32000,
             .low_limit = -1
     };
     ESP_ERROR_CHECK(pcnt_new_unit(&unit_config_windspeed, &pcnt_unit_windspeed));
-    pcnt_chan_config_t chan_config_windspeed = {
+    const pcnt_chan_config_t chan_config_windspeed = {
             .edge_gpio_num = ANEM_GPIO,
             .level_gpio_num = -1
     };
@@ -114,7 +131,7 @@ void init_controller()
     ESP_ERROR_CHECK(pcnt_unit_start(pcnt_unit_windspeed));
 
     //Init timers for angular velocity measurement
-    timer_config_t timer_config = {
+    const timer_config_t timer_config = {
             .divider = TIMER_DIVIDER,
             .counter_dir = TIMER_COUNT_UP,
             .counter_en = TIMER_PAUSE,
@@ -163,7 +180,7 @@ static int16_t get_current_adc_raw()
 static void set_mos_current(float current, linear_calib_t calib)
 {
     uint8_t dac_value = (current > 0) ? (current * calib.coefficient1) + calib.offset : 0;
-    dac_output_voltage(LOAD_DAC_CHANNEL, dac_value);
+    dac_oneshot_output_voltage(current_dac_handle, dac_value);
     ESP_LOGI(TAG, "Set dac output channel to %d", dac_value);
 }
 
@@ -251,14 +268,6 @@ float get_wind_speed()
     }
 }
 
-static bool IRAM_ATTR windspeed_isr_callback(void * args)
-{
-    int pulses = 0;
-    pcnt_unit_get_count(pcnt_unit_windspeed, &pulses);
-    pulses_per_interval_windspeed = pulses;
-    pcnt_unit_clear_count(pcnt_unit_windspeed);
-    return false;
-}
 
 bool get_gpio(uint8_t gpio_num)
 {

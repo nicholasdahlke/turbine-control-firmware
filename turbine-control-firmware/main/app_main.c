@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <driver/dac.h>
 #include <esp_log.h>
 #include <esp_vfs_fat.h>
 #include <driver/sdmmc_host.h>
@@ -73,8 +72,10 @@ void initialize()
 void app_main(void)
 {
     initialize();
-    set_divider_state(1);
-    set_load_current(1.5);
+    //set_divider_state(1);
+    //set_load_current(1.5);
+    set_gpio(DO2_GPIO, true);
+    bool value = true;
     for(;;)
     {
         ESP_LOGI(TAG, "Current enc speed of %f", get_angular_speed());
@@ -83,6 +84,6 @@ void app_main(void)
         //ESP_LOGI(TAG, "Value of DI1 is %d", get_gpio(DI1_GPIO));
         //ESP_LOGI(TAG, "Value of DI2 is %d", get_gpio(DI2_GPIO));
         //ESP_LOGI(TAG, "Value of DI3 is %d", get_gpio(DI3_GPIO));
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 }
