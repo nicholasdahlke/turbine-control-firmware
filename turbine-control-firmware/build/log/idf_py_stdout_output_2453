@@ -1,0 +1,19 @@
+[1/11] Performing build step for 'bootloader'
+[1/1] cd /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/bootloader/esp-idf/esptool_py && /home/nicholas/.espressif/python_env/idf5.4_py3.12_env/bin/python /home/nicholas/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/bootloader/bootloader.bin
+Bootloader binary size 0x6560 bytes. 0xaa0 bytes (9%) free.
+[2/11] No install step for 'bootloader'
+[3/11] Completed 'bootloader'
+[4/11] Building C object esp-idf/mcp23008/CMakeFiles/__idf_mcp23008.dir/mcp23008.c.obj
+[5/11] Linking C static library esp-idf/mcp23008/libmcp23008.a
+[6/11] Building C object esp-idf/ads111x/CMakeFiles/__idf_ads111x.dir/ads111x.c.obj
+[7/11] Linking C static library esp-idf/ads111x/libads111x.a
+[8/11] Generating ld/sections.ld
+[9/11] Linking CXX executable turbine-control-firmware.elf
+[10/11] Generating binary image from built executable
+esptool.py v4.8.1
+Creating esp32 image...
+Merged 2 ELF sections
+Successfully created esp32 image.
+Generated /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/turbine-control-firmware.bin
+[11/11] cd /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/esp-idf/esptool_py && /home/nicholas/.espressif/python_env/idf5.4_py3.12_env/bin/python /home/nicholas/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/partition_table/partition-table.bin /home/nicholas/turbine-control-firmware/turbine-control-firmware/build/turbine-control-firmware.bin
+turbine-control-firmware.bin binary size 0x369f0 bytes. Smallest app partition is 0x100000 bytes. 0xc9610 bytes (79%) free.

@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "turbine-control-firmware",
-    "project_version":    "ae77567-dirty",
+    "project_version":    "eb755a4-dirty",
     "project_path":       "/home/nicholas/turbine-control-firmware/turbine-control-firmware",
     "idf_path":           "/home/nicholas/esp-idf",
     "build_dir":          "/home/nicholas/turbine-control-firmware/turbine-control-firmware/build",

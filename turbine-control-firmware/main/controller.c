@@ -24,6 +24,15 @@ static bool IRAM_ATTR windspeed_isr_callback(void * args)
     return false;
 }
 
+static bool IRAM_ATTR encoder_speed_isr_callback(void * args)
+{
+    int pulses = 0;
+    pcnt_unit_get_count(pcnt_unit_encoder, &pulses);
+    pulses_per_interval_encoder = pulses;
+    pcnt_unit_clear_count(pcnt_unit_encoder);
+    return false;
+}
+
 
 void init_controller()
 {
@@ -56,6 +65,7 @@ void init_controller()
     ESP_LOGI(TAG, "Initializing IO Expanders finished");
 
     // Init ESP GPIO
+    ESP_LOGI(TAG, "Initializing ESP GPIO");
     ESP_ERROR_CHECK(gpio_set_direction(DO1_GPIO, GPIO_MODE_OUTPUT));
     ESP_ERROR_CHECK(gpio_set_direction(DO2_GPIO, GPIO_MODE_OUTPUT));
 
@@ -64,6 +74,7 @@ void init_controller()
 
     ESP_ERROR_CHECK(gpio_pullup_en(DO1_GPIO));
     ESP_ERROR_CHECK(gpio_pullup_en(DO2_GPIO));
+    ESP_LOGI(TAG, "Initializing ESP GPIO finished");
 
 
 
@@ -79,18 +90,24 @@ void init_controller()
     ESP_ERROR_CHECK(ads111x_set_data_rate(&adc2, ADS111X_DATA_RATE_128));
 
     adc_gain = ads111x_gain_values[ADS111X_GAIN_2V048];
+    ESP_LOGI(TAG, "Initializing ADCs finished");
 
+    
     // Init DAC
-//    ESP_ERROR_CHECK(dac_output_enable(LOAD_DAC_CHANNEL));
-//    ESP_ERROR_CHECK(dac_output_voltage(LOAD_DAC_CHANNEL, 0));
+    ESP_LOGI(TAG, "Initializing DAC");
+    //ESP_ERROR_CHECK(dac_output_enable(LOAD_DAC_CHANNEL)); legacy driver code
+    //ESP_ERROR_CHECK(dac_output_voltage(LOAD_DAC_CHANNEL, 0));
 
     const dac_oneshot_config_t dac_config = {
 	     .chan_id = LOAD_DAC_CHANNEL
     };
     ESP_ERROR_CHECK(dac_oneshot_new_channel(&dac_config, &current_dac_handle));
     ESP_ERROR_CHECK(dac_oneshot_output_voltage(current_dac_handle, 0));
+    ESP_LOGI(TAG, "Initializing DAC finished");
+
 
     //Init pulse counter for quadrature decoding
+    ESP_LOGI(TAG, "Initializing pulse counters");
     const pcnt_unit_config_t unit_config_encoder = {
             .high_limit = 30000,
             .low_limit = -30000
@@ -152,6 +169,7 @@ void init_controller()
     timer_enable_intr(TIMER_GROUP_1, TIMER_0);
     timer_isr_callback_add(TIMER_GROUP_1, TIMER_0, windspeed_isr_callback, 0, 0);
     timer_start(TIMER_GROUP_1, TIMER_0);
+    ESP_LOGI(TAG, "Initializing pulse counters finished");
 
 }
 
@@ -245,14 +263,6 @@ float get_angular_speed()
     }
 }
 
-static bool IRAM_ATTR encoder_speed_isr_callback(void * args)
-{
-    int pulses = 0;
-    pcnt_unit_get_count(pcnt_unit_encoder, &pulses);
-    pulses_per_interval_encoder = pulses;
-    pcnt_unit_clear_count(pcnt_unit_encoder);
-    return false;
-}
 
 float get_wind_speed()
 {

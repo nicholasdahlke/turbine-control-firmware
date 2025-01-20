@@ -97,7 +97,7 @@ float get_voltage_adc(linear_calib_t calib);
 void set_load_current(float current_setpoint);
 
 float get_angular_speed();
-static bool encoder_speed_isr_callback(void * args);
+//static bool encoder_speed_isr_callback(void * args);
 
 float get_wind_speed();
 //static bool windspeed_isr_callback(void * args);
