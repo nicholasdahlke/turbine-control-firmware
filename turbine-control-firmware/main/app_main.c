@@ -19,7 +19,6 @@ void initialize()
 
     init_controller();
     //set_fan_state(true);
-
     
     // SD Card
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
